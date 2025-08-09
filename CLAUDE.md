@@ -1,157 +1,180 @@
-# VocalIQ Voice Agent System - Entwicklungsdokumentation
+# CLAUDE.md
 
-## 🏗️ Projekt Status
-**Stand:** 09.08.2025 - Vollständig funktionsfähiges Frontend mit Voice Preview System
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📁 Projektstruktur
+## 🏗️ Project Overview
+
+**VocalIQ** - Enterprise-grade AI telephone assistant platform for business communication automation.
+
+## 📁 Project Structure
 
 ```
-/Users/marcelgaertner/Desktop/Ki voice Agenten ! /vocaliq-setup-docs/
-├── frontend/                          # React + TypeScript + Vite Frontend
+vocaliq-voice-agent/
+├── backend/
+│   ├── api/
+│   │   ├── core/              # Config, Database, Security
+│   │   ├── models/            # SQLModel entities
+│   │   ├── routes/            # API endpoints
+│   │   │   └── admin/         # Admin-specific routes
+│   │   ├── services/          # Business logic
+│   │   └── repositories/      # Data access layer
+│   ├── alembic/               # Database migrations
+│   └── requirements.txt       # Python dependencies
+├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── VoicePreview.tsx       # ✅ NEU: Voice Preview Komponente
-│   │   │   ├── ScheduleEditor.tsx     # ✅ Zeitplanung für Agent
-│   │   │   ├── layout/
-│   │   │   └── ui/                    # Button, Card, Input, Badge
+│   │   ├── components/        # UI components
 │   │   ├── pages/
-│   │   │   ├── Dashboard.tsx          # ✅ Hauptdashboard 
-│   │   │   ├── Settings.tsx           # ✅ Einstellungen mit Voice Preview
-│   │   │   ├── KnowledgeBase.tsx      # ✅ File Upload & Processing
-│   │   │   └── CallHistory.tsx        # Call-Verlauf
-│   │   ├── store/
-│   │   │   └── settingsStore.ts       # ✅ Zustand Management mit localStorage
-│   │   └── services/
-│   │       └── api.ts                 # ✅ API Services
-│   ├── public/
-│   │   └── audio/
-│   │       └── voice-samples/         # ✅ NEU: Voice Preview Dateien
-│   └── package.json                   # Dependencies installiert
-├── backend/                           # Python FastAPI Backend
-│   └── api/
-│       └── services/
-│           └── knowledge_service.py   # ✅ File Processing Pipeline
-└── CLAUDE.md                         # ⚠️ Diese Dokumentation
+│   │   │   ├── auth/          # Login pages (Admin/Customer)
+│   │   │   └── admin/         # Admin dashboard pages
+│   │   ├── layouts/           # AdminLayout, DashboardLayout
+│   │   ├── services/          # API client
+│   │   └── stores/            # Zustand state management
+│   │       └── authStore.ts   # Auth with role-based access
+│   └── package.json
+├── docker-compose.yml         # Container orchestration
+└── Makefile                   # Development commands
 ```
 
-## 🎯 Was wurde implementiert
+## 🆕 Recent Updates (Admin Dashboard)
 
-### ✅ Vollständig fertig:
-1. **Frontend Dashboard** - Funktionsfähig mit allen API Keys
-2. **Deutsche Stimmen** - Antoni, Elli, Callum, Charlotte, Liam integriert
-3. **Knowledge Base Upload** - Drag & Drop, Progress-Anzeige, Processing Status
-4. **Agent On/Off Control** - Mit Status-Anzeige und Zeitzone
-5. **Zeitplanung System** - Komplexer Scheduler mit Wochentagen (z.B. Mo+Di 23:00-06:00)
-6. **Voice Preview System** - ✅ **GERADE FERTIG**: Play-Buttons für alle Stimmen
+### Admin Portal Features:
+1. **Separate Login System**
+   - `/admin/login` - Admin portal access
+   - `/login` - Customer portal access
+   - Role-based authentication (admin/customer)
 
-### 🔧 Technische Details:
+2. **Admin Dashboard** (`/admin/dashboard`)
+   - Service Quick Links to all external platforms
+   - System statistics overview
+   - Quick action buttons
 
-#### Voice Preview System (NEU implementiert):
-- **Komponente:** `/src/components/VoicePreview.tsx`
-- **Funktionen:** Play/Pause, Loading States, Waveform Animation
-- **Integration:** In Settings.tsx unter Voice ID Selection
-- **Audio Dateien:** `/public/audio/voice-samples/` (Platzhalter vorhanden)
+3. **API Configuration Center** (`/admin/api-config`)
+   - Centralized API key management
+   - Service status indicators
+   - Direct links to service dashboards:
+     - OpenAI Platform
+     - ElevenLabs Console
+     - Twilio Dashboard
+     - Weaviate Cloud
 
-#### Settings Store (Zustand):
-```typescript
-// /src/store/settingsStore.ts
-interface SettingsData {
-  voiceId: string              // Aktuell: 'Antoni'
-  agentEnabled: boolean        // Agent On/Off Switch
-  schedule: Record<string, ScheduleSlot[]>  // Wochentag-Zeitplan
-  timezone: string            // Europa/Berlin
-  // ... alle anderen API Keys und Einstellungen
-}
-```
+4. **Customer Settings Cleaned**
+   - API keys removed from customer settings
+   - Only company-specific settings remain
+   - Admin notification for API changes
 
-#### Knowledge Base Processing:
-```python
-# /backend/api/services/knowledge_service.py
-# File → Text → Chunks (500 tokens) → OpenAI Embeddings → Weaviate Vector DB
-```
+## 🛠️ Development Commands
 
-## 🚧 Nächste Schritte für den neuen Agenten:
-
-### 1. Voice Preview Dateien erstellen:
 ```bash
-# Erforderliche Audio-Dateien in /public/audio/voice-samples/:
-- antoni-de.mp3     # "Hallo, ich bin Ihr virtueller Assistent von VocalIQ..."
-- elli-de.mp3       
-- callum-de.mp3
-- charlotte-de.mp3  
-- liam-de.mp3
-- rachel-en.mp3     # "Hello, I'm your virtual assistant from VocalIQ..."
-- drew-en.mp3
-- clyde-en.mp3
-- paul-en.mp3
-- domi-en.mp3
-- dave-en.mp3
+# Development
+make up                # Start all services
+make down              # Stop services
+make logs              # View logs
+make test              # Run tests
+
+# Database
+make db-init           # Initialize database
+make db-migrate        # Create migration
+make db-upgrade        # Apply migrations
+
+# Frontend Development
+cd frontend
+npm run dev            # Start dev server (port 5173)
+npm run build          # Production build
+npm run lint           # Run linter
 ```
 
-### 2. Backend Integration testen:
-- API Verbindungen zu OpenAI, ElevenLabs, Twilio
-- Knowledge Base Upload mit echten Dateien
-- Agent Scheduling Backend-Logik
+## 🔑 Important Files
 
-### 3. Mögliche Erweiterungen:
-- Live TTS Preview (API-basiert)
-- Call Recording Playback
-- Analytics Dashboard
-- Mobile Optimierung
+### Backend
+- `api/core/config.py` - 150+ configuration parameters
+- `api/core/database.py` - Async SQLAlchemy setup
+- `api/services/voice_pipeline.py` - Audio processing pipeline
+- `api/services/openai_service.py` - GPT-4 integration
+- `api/routes/admin/company_management.py` - Multi-tenant management
 
-## 🛠️ Entwicklungsumgebung
+### Frontend
+- `src/stores/authStore.ts` - Authentication with roles
+- `src/pages/admin/AdminDashboard.tsx` - Admin overview with quick links
+- `src/pages/admin/ApiConfiguration.tsx` - API key management
+- `src/layouts/AdminLayout.tsx` - Admin navigation
+- `src/pages/auth/AdminLogin.tsx` - Admin login page
+- `src/pages/auth/CustomerLogin.tsx` - Customer login page
 
-### Frontend starten:
-```bash
-cd "/Users/marcelgaertner/Desktop/Ki voice Agenten ! /vocaliq-setup-docs/frontend"
-npm run dev
-# Läuft auf http://localhost:5173
+## 🏗️ Architecture
+
+### Voice Processing Pipeline
+```
+Call → Twilio → WebSocket → Audio Buffer
+        ↓
+   μ-law Decode → Whisper STT → GPT-4 → ElevenLabs TTS
+        ↓
+   μ-law Encode → Twilio → Caller
 ```
 
-### Aktuell installierte Dependencies:
-- React 18 + TypeScript + Vite
-- Zustand (State Management) 
-- Axios (API Calls)
-- Tailwind CSS v3 (downgrade von v4 wegen Kompatibilität)
-- Heroicons (Icons)
+### Authentication Flow
+- JWT with access/refresh tokens
+- Role-based access (admin/customer)
+- Session management per role
+- Protected routes
 
-### Wichtige Dateien zum Weiterarbeiten:
-1. **Settings.tsx:327-337** - Voice Preview Integration
-2. **VoicePreview.tsx** - Komplette Voice Preview Komponente
-3. **settingsStore.ts** - State Management mit localStorage
-4. **KnowledgeBase.tsx** - File Upload mit Progress
-5. **ScheduleEditor.tsx** - Zeitplanung Komponente
+### Tech Stack
+- **Backend**: FastAPI, Python 3.11+, SQLModel, Alembic
+- **Frontend**: React 19, TypeScript, Vite, Zustand, Tailwind CSS
+- **Databases**: PostgreSQL, Redis, Weaviate
+- **Services**: OpenAI GPT-4, Twilio, ElevenLabs
+- **Infrastructure**: Docker, Docker Compose
 
-## ⚠️ Bekannte Issues & Lösungen:
+## 🚀 Getting Started
 
-### 1. Tailwind CSS:
-- **Problem:** v4 nicht kompatibel
-- **Lösung:** Downgrade auf v3, PostCSS Config angepasst
+1. **Clone and setup**
+   ```bash
+   git clone https://github.com/MarcelGaertner1234/vocaliq-voice-agent
+   cd vocaliq-voice-agent
+   cp env.example .env
+   ```
 
-### 2. Import Conflicts:
-- **Problem:** Settings interface vs React Component
-- **Lösung:** Interface umbenannt zu SettingsData
+2. **Configure environment**
+   - Add API keys to `.env`
+   - Or use Admin Portal to configure after login
 
-### 3. Zustand Persist:
-- **Problem:** Persist Middleware Fehler
-- **Lösung:** Manuelles localStorage Management
+3. **Start services**
+   ```bash
+   make setup
+   make up
+   make db-init
+   ```
 
-## 🎨 UI/UX Status:
-- ✅ Responsive Design
-- ✅ Deutsche Labels und UI
-- ✅ Loading States überall
-- ✅ Error Handling
-- ✅ Progress Indicators
-- ✅ Drag & Drop File Upload
-- ✅ Voice Preview mit Animation
+4. **Access portals**
+   - Customer: http://localhost:5173/login
+   - Admin: http://localhost:5173/admin/login
+   - API Docs: http://localhost:8001/docs
 
-## 📝 Benutzer Feedback:
-- ✅ "super genau so habe ich mir es vorgestellt!" - Dashboard
-- ✅ Deutsche Stimmen erfolgreich integriert
-- ✅ File Upload Processing erklärt
-- ✅ Zeitplanung Mo+Di 23:00-06:00 implementiert  
-- ✅ Voice Preview "das einzige was mir noch fehlt" - FERTIG!
+## 🔐 Default Admin Credentials
 
----
+```
+Username: admin
+Password: Check ADMIN_PASSWORD in .env
+```
 
-**Für den nächsten Agenten:** Alles ist bereit zum Weiterarbeiten. Das Frontend ist vollständig funktional, nur die Audio-Dateien für Voice Preview müssen noch erstellt werden. Backend-Integration kann getestet und erweitert werden.
+## 📝 Notes for Development
+
+- API keys are now managed ONLY in Admin Portal
+- Customer settings only contain company-specific configs
+- Use `make` commands for common tasks
+- Frontend uses Vite for fast HMR
+- Backend supports hot-reload in development
+
+## 🐛 Common Issues
+
+1. **Auth issues**: Clear localStorage and re-login
+2. **API connection**: Check services are running with `docker ps`
+3. **Database**: Run `make db-upgrade` for migrations
+4. **Frontend build**: Clear node_modules and reinstall
+
+## 🔗 External Service Links
+
+Quick access for admins:
+- OpenAI: https://platform.openai.com
+- ElevenLabs: https://elevenlabs.io
+- Twilio: https://console.twilio.com
+- Weaviate: https://console.weaviate.cloud

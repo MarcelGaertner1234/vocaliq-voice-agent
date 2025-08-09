@@ -3,13 +3,15 @@ import {
   ChartBarIcon, 
   PhoneIcon, 
   DocumentTextIcon, 
-  CogIcon 
+  CogIcon,
+  PhoneArrowUpRightIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: ChartBarIcon },
   { name: 'Call History', href: '/calls', icon: PhoneIcon },
   { name: 'Knowledge Base', href: '/knowledge', icon: DocumentTextIcon },
+  { name: 'Test Call', href: '/test-call', icon: PhoneArrowUpRightIcon },
   { name: 'Settings', href: '/settings', icon: CogIcon },
 ]
 

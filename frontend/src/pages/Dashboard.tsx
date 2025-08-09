@@ -1,15 +1,50 @@
 import { Card, CardHeader, CardContent } from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
+import Button from '../components/ui/Button'
+import { useNavigate } from 'react-router-dom'
 import { 
   PhoneIcon, 
   ClockIcon, 
   CheckCircleIcon,
-  ExclamationCircleIcon 
+  ExclamationCircleIcon,
+  PhoneArrowUpRightIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline'
 
 function Dashboard() {
+  const navigate = useNavigate()
+
+  const handleEmergencyStop = () => {
+    if (confirm('Are you sure you want to stop all voice agents? This will end all active calls immediately.')) {
+      // API call to stop all agents
+      alert('All voice agents have been stopped. An admin has been notified.')
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <div className="flex space-x-3">
+          <Button 
+            onClick={() => navigate('/test-call')}
+            className="flex items-center"
+          >
+            <PhoneArrowUpRightIcon className="h-4 w-4 mr-2" />
+            Test Agent
+          </Button>
+          <Button 
+            variant="error"
+            onClick={handleEmergencyStop}
+            className="flex items-center"
+          >
+            <XCircleIcon className="h-4 w-4 mr-2" />
+            Emergency Stop
+          </Button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent>

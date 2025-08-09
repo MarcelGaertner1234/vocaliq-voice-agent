@@ -130,6 +130,7 @@ async def login(
                 "username": settings.ADMIN_USERNAME,
                 "email": settings.ADMIN_EMAIL,
                 "full_name": "System Administrator",
+                "role": "admin",  # Added role field
                 "is_active": True,
                 "scopes": ["admin", "user", "calls", "analytics"]
             }

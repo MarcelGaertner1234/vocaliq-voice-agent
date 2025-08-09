@@ -7,17 +7,17 @@ import { useSettingsStore, type ScheduleSlot } from '../store/settingsStore'
 import ScheduleEditor from '../components/ScheduleEditor'
 import VoicePreview from '../components/VoicePreview'
 import { 
-  KeyIcon,
   PhoneIcon,
   SpeakerWaveIcon,
   CogIcon,
   PowerIcon,
-  ClockIcon
+  ClockIcon,
+  BuildingOfficeIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline'
 
 function Settings() {
-  const { settings, isLoading, loadSettings, updateSettings, testConnection } = useSettingsStore()
-  const [testingService, setTestingService] = useState<string | null>(null)
+  const { settings, isLoading, loadSettings, updateSettings } = useSettingsStore()
   const [localSettings, setLocalSettings] = useState(settings)
   
   useEffect(() => {
@@ -42,34 +42,15 @@ function Settings() {
     await updateSettings(localSettings)
   }
 
-  const handleTestConnection = async (service: string) => {
-    setTestingService(service)
-    
-    let credentials: Record<string, string> = {}
-    switch (service) {
-      case 'OpenAI':
-        credentials = { apiKey: localSettings.openaiApiKey }
-        break
-      case 'ElevenLabs':
-        credentials = { apiKey: localSettings.elevenLabsApiKey }
-        break
-      case 'Twilio':
-        credentials = { 
-          accountSid: localSettings.twilioAccountSid,
-          authToken: localSettings.twilioAuthToken
-        }
-        break
-    }
-    
-    const success = await testConnection(service, credentials)
-    alert(success ? `${service} connection successful!` : `${service} connection failed!`)
-    setTestingService(null)
-  }
+  // API test removed - now handled in Admin Portal
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Company Settings</h1>
+          <p className="text-sm text-gray-500 mt-1">Configure your company-specific preferences</p>
+        </div>
         <Button onClick={handleSave} disabled={isLoading}>
           {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
@@ -168,10 +149,23 @@ function Settings() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Primary Phone Number
               </label>
-              <Input
+              <select
                 value={localSettings.phoneNumber}
                 onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-              />
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="">Select a phone number</option>
+                <optgroup label="Twilio Numbers">
+                  <option value="+49 30 12345678">+49 30 12345678 (Main Support)</option>
+                  <option value="+49 30 87654321">+49 30 87654321 (Sales)</option>
+                </optgroup>
+                <optgroup label="Your Numbers">
+                  <option value="+49 170 9876543">+49 170 9876543 (Mobile)</option>
+                </optgroup>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Contact your admin to add or configure phone numbers
+              </p>
             </div>
 
             <div>
@@ -212,84 +206,18 @@ function Settings() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                OpenAI API Key
-              </label>
-              <div className="flex space-x-2">
-                <Input
-                  type="password"
-                  value={localSettings.openaiApiKey}
-                  onChange={(e) => handleInputChange('openaiApiKey', e.target.value)}
-                  className="flex-1"
-                  placeholder="sk-..."
-                />
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleTestConnection('OpenAI')}
-                  disabled={testingService === 'OpenAI' || !localSettings.openaiApiKey}
-                >
-                  {testingService === 'OpenAI' ? 'Testing...' : 'Test'}
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ElevenLabs API Key
-              </label>
-              <div className="flex space-x-2">
-                <Input
-                  type="password"
-                  value={localSettings.elevenLabsApiKey}
-                  onChange={(e) => handleInputChange('elevenLabsApiKey', e.target.value)}
-                  className="flex-1"
-                  placeholder="el_..."
-                />
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleTestConnection('ElevenLabs')}
-                  disabled={testingService === 'ElevenLabs' || !localSettings.elevenLabsApiKey}
-                >
-                  {testingService === 'ElevenLabs' ? 'Testing...' : 'Test'}
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Twilio Account SID
-              </label>
-              <Input
-                type="password"
-                value={localSettings.twilioAccountSid}
-                onChange={(e) => handleInputChange('twilioAccountSid', e.target.value)}
-                placeholder="AC..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Twilio Auth Token
-              </label>
-              <div className="flex space-x-2">
-                <Input
-                  type="password"
-                  value={localSettings.twilioAuthToken}
-                  onChange={(e) => handleInputChange('twilioAuthToken', e.target.value)}
-                  className="flex-1"
-                  placeholder="Enter auth token..."
-                />
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleTestConnection('Twilio')}
-                  disabled={testingService === 'Twilio' || !localSettings.twilioAccountSid || !localSettings.twilioAuthToken}
-                >
-                  {testingService === 'Twilio' ? 'Testing...' : 'Test'}
-                </Button>
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start">
+                <BuildingOfficeIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-2" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">API Configuration</p>
+                  <p className="text-sm text-blue-700 mt-1">
+                    API keys and service integrations are now managed centrally by your administrator.
+                  </p>
+                  <p className="text-xs text-blue-600 mt-2">
+                    Contact your admin for API-related changes.
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>

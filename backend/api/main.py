@@ -171,6 +171,46 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Knowledge router not available: {e}")
 
+# Phone Numbers Router unter /api registrieren
+try:
+    from api.routes.phone_numbers import router as phone_numbers_router
+    api_router.include_router(phone_numbers_router)
+    logger.info("✅ Phone Numbers router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Phone Numbers router not available: {e}")
+
+# Webhooks Router unter /api registrieren
+try:
+    from api.routes.webhooks import router as webhooks_router
+    api_router.include_router(webhooks_router)
+    logger.info("✅ Webhooks router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Webhooks router not available: {e}")
+
+# Test Call Router unter /api registrieren
+try:
+    from api.routes.test_call import router as test_call_router
+    api_router.include_router(test_call_router)
+    logger.info("✅ Test Call router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Test Call router not available: {e}")
+
+# Companies Router unter /api registrieren
+try:
+    from api.routes.companies import router as companies_router
+    api_router.include_router(companies_router)
+    logger.info("✅ Companies router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Companies router not available: {e}")
+
+# Users Router unter /api registrieren
+try:
+    from api.routes.users import router as users_router
+    api_router.include_router(users_router)
+    logger.info("✅ Users router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Users router not available: {e}")
+
 # Root-API-Router an App hängen
 app.include_router(api_router)
 

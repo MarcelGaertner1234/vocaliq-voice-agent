@@ -3,6 +3,7 @@ import { Card, CardHeader, CardContent } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Badge from '../components/ui/Badge'
+import CallDetailsModal from '../components/CallDetailsModal'
 import { 
   MagnifyingGlassIcon,
   PhoneIcon,
@@ -12,6 +13,8 @@ import {
 
 function CallHistory() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCall, setSelectedCall] = useState<any>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const calls = [
     {
@@ -83,6 +86,15 @@ function CallHistory() {
       case 'inquiry': return 'warning'
       default: return 'default'
     }
+  }
+
+  const handleViewCall = (call: any) => {
+    setSelectedCall({
+      ...call,
+      sentiment: 'positive',
+      audioUrl: null // Mock - in real app would have actual audio URL
+    })
+    setIsModalOpen(true)
   }
 
   return (
@@ -180,7 +192,11 @@ function CallHistory() {
                       {call.timestamp}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewCall(call)}
+                      >
                         <DocumentTextIcon className="h-4 w-4 mr-1" />
                         View
                       </Button>
@@ -192,6 +208,13 @@ function CallHistory() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Call Details Modal */}
+      <CallDetailsModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        call={selectedCall}
+      />
     </div>
   )
 }

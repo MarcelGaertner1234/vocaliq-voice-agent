@@ -1,0 +1,38 @@
+# VocalIQ Backend - Minimale Requirements für JWT-Auth
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+gunicorn>=21.2.0
+
+# Authentication & Security
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+email-validator
+cryptography
+
+# Configuration & Settings
+python-dotenv
+pydantic[email]
+pydantic-settings
+
+# Redis for Sessions
+redis
+
+# HTTP Client
+httpx
+
+# Async Support
+aiofiles
+
+# Phone Number Validation
+phonenumbers
+
+# Database
+sqlmodel>=0.0.12
+asyncpg>=0.29.0
+alembic>=1.13.0
+
+# External Service Integrations
+twilio
+openai
+tenacity

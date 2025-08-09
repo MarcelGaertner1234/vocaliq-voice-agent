@@ -127,6 +127,14 @@ async def add_process_time_header(request: Request, call_next):
 app.include_router(auth_router)
 app.include_router(calls_router)
 
+# Twilio Voice Router
+try:
+    from api.routers.twilio import router as twilio_router
+    app.include_router(twilio_router, prefix="/api")
+    logger.info("✅ Twilio router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Twilio router not available: {e}")
+
 # Demo router für Database-Integration
 from api.routes.demo import router as demo_router
 app.include_router(demo_router)

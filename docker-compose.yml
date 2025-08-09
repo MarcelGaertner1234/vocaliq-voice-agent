@@ -5,6 +5,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: vocaliq-api
+    env_file: .env
     environment:
       - ENVIRONMENT=development
       - DATABASE_URL=postgresql://vocaliq:vocaliq@postgres:5432/vocaliq
@@ -13,6 +14,10 @@ services:
       - JWT_SECRET_KEY=olCh8rq3K2lWhUXib0piWooLkJxl6oi7bNBq816CT1U=
       - ADMIN_PASSWORD=sz9BdPui*eqhfmk1
       - ENCRYPTION_KEY=yp0I0MHV7A95oUsLZqJdTtB6q3gmB0Ms8NbCMu9kB3Y=
+      - WEAVIATE_URL=http://weaviate:8080
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - API_BASE_URL=http://localhost:8001
+      - FRONTEND_URL=http://localhost:5173
     volumes:
       - ./backend:/app
       - ./backend/alembic:/app/alembic
@@ -32,7 +37,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: vocaliq-frontend
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://api:8000
     volumes:
       - ./backend/frontend:/app
       - /app/node_modules
@@ -78,6 +83,7 @@ services:
   weaviate:
     image: semitechnologies/weaviate:latest
     container_name: vocaliq-weaviate
+    env_file: .env
     environment:
       - QUERY_DEFAULTS_LIMIT=25
       - AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true

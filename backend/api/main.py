@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 import time
 import logging
 from contextlib import asynccontextmanager
+from fastapi import APIRouter
 
 from api.core.config import get_settings
 from api.routes.auth import router as auth_router
@@ -124,20 +125,54 @@ async def add_process_time_header(request: Request, call_next):
 
 
 # Routes einbinden
-app.include_router(auth_router)
-app.include_router(calls_router)
+# app.include_router(auth_router)
+# app.include_router(calls_router)
 
-# Twilio Voice Router
+# Twilio/Demo werden weiter unten unter dem gebündelten /api Router registriert
+
+# Einheitlicher API-Router mit Prefix /api
+api_router = APIRouter(prefix="/api")
+api_router.include_router(auth_router)
+api_router.include_router(calls_router)
+
+# Twilio Voice Router unter /api registrieren
 try:
     from api.routers.twilio import router as twilio_router
-    app.include_router(twilio_router, prefix="/api")
+    api_router.include_router(twilio_router)
     logger.info("✅ Twilio router registered")
 except ImportError as e:
     logger.warning(f"⚠️ Twilio router not available: {e}")
 
-# Demo router für Database-Integration
+# Demo-Router unter /api registrieren
 from api.routes.demo import router as demo_router
-app.include_router(demo_router)
+api_router.include_router(demo_router)
+
+# System-Router unter /api registrieren
+try:
+    from api.routes.system import router as system_router
+    api_router.include_router(system_router)
+    logger.info("✅ System router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ System router not available: {e}")
+
+# Settings-Router unter /api registrieren
+try:
+    from api.routes.settings import router as settings_router
+    api_router.include_router(settings_router)
+    logger.info("✅ Settings router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Settings router not available: {e}")
+
+# Knowledge-Router unter /api registrieren
+try:
+    from api.routes.knowledge import router as knowledge_router
+    api_router.include_router(knowledge_router)
+    logger.info("✅ Knowledge router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Knowledge router not available: {e}")
+
+# Root-API-Router an App hängen
+app.include_router(api_router)
 
 
 # Root Endpoints

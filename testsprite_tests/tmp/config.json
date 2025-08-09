@@ -1,0 +1,12 @@
+{
+  "status": "init",
+  "executionArgs": {
+    "projectName": "vocaliq-setup-docs",
+    "projectPath": "/Users/marcelgaertner/Desktop/Ki voice Agenten ! /vocaliq-setup-docs",
+    "testIds": [],
+    "additionalInstruction": "N/A",
+    "envs": {
+      "API_KEY": ""
+    }
+  }
+}

@@ -36,3 +36,14 @@ alembic>=1.13.0
 twilio
 openai
 tenacity
+
+# Voice Pipeline deps
+numpy
+pydub
+
+# Knowledge / RAG deps
+weaviate-client>=3.26.7,<4.0.0
+tiktoken
+PyPDF2
+python-docx
+python-dateutil

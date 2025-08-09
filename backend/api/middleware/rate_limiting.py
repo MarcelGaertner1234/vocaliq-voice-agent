@@ -208,29 +208,29 @@ def get_endpoint_rate_limit(path: str) -> str:
     """Bestimme Rate-Limit basierend auf Endpoint"""
     endpoint_limits = {
         # Authentication endpoints
-        "/auth/login": "10/minute",
-        "/auth/refresh": "30/minute",
+        "/api/auth/login": "10/minute",
+        "/api/auth/refresh": "30/minute",
         
         # Call endpoints (resource-intensive)
-        "/calls/": "20/minute",
-        "/calls/outbound": "10/minute",
+        "/api/calls/": "20/minute",
+        "/api/calls/outbound": "10/minute",
         
         # Audio processing (sehr resource-intensive)
-        "/audio/transcribe": "5/minute",
-        "/audio/synthesize": "10/minute",
+        "/api/audio/transcribe": "5/minute",
+        "/api/audio/synthesize": "10/minute",
         
         # AI conversation
-        "/ai/conversation": "50/minute",
+        "/api/ai/conversation": "50/minute",
         
         # Webhooks (hoher Durchsatz erlaubt)
-        "/webhooks/": "200/minute",
+        "/api/webhooks/": "200/minute",
         
         # General API endpoints
-        "/users/": "100/minute",
-        "/organizations/": "100/minute",
+        "/api/users/": "100/minute",
+        "/api/organizations/": "100/minute",
         
         # Analytics (read-heavy)
-        "/analytics/": "200/minute",
+        "/api/analytics/": "200/minute",
     }
     
     # Find matching pattern

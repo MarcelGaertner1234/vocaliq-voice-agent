@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     libffi-dev \
     libssl-dev \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Requirements kopieren und installieren

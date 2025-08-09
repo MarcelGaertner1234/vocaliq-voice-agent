@@ -108,6 +108,11 @@ async def create_tables():
             Organization, User, PhoneNumber, CallLog, 
             Conversation, CallAnalytics, APIKey, SystemConfig
         )
+        # Zusätzlich Company-bezogene Modelle (ohne kollidierenden CallLog)
+        try:
+            from api.models.company import Company, KnowledgeBase, Document, CompanyIntent, Appointment  # noqa: F401
+        except Exception as e:
+            logger.warning(f"Company models not fully available: {e}")
         
         async with engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.create_all)

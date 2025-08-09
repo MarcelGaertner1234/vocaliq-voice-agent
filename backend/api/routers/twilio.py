@@ -48,36 +48,24 @@ async def handle_incoming_call(request: Request):
         
         logger.info(f"Incoming call: {call_sid} from {from_number} to {to_number}")
         
-        # Create TwiML response
-        response = VoiceResponse()
+        # Build WebSocket URL from request host/proto (fallback to settings)
+        forwarded_proto = request.headers.get("x-forwarded-proto") or request.headers.get("X-Forwarded-Proto")
+        forwarded_host = request.headers.get("x-forwarded-host") or request.headers.get("X-Forwarded-Host")
+        scheme = forwarded_proto or request.url.scheme
+        host = forwarded_host or request.headers.get("host") or request.url.netloc
+        if not host:
+            # Fallback to settings
+            base_url = settings.API_BASE_URL.rstrip("/")
+            scheme = "https" if base_url.startswith("https://") else "http"
+            host = base_url.replace("http://", "").replace("https://", "")
+        ws_scheme = "wss" if scheme == "https" else "ws"
+        websocket_url = f"{ws_scheme}://{host}/api/twilio/websocket"
         
-        # Initial greeting
-        response.say(
-            "Hello! Welcome to VocalIQ. I'm your AI assistant. How can I help you today?",
-            voice="alice"
-        )
-        
-        # For now, just use simple response without WebSocket (for testing)
-        # TODO: Re-enable WebSocket once basic call works
-        response.say(
-            "Thank you for calling. This is a test of the VocalIQ system. Goodbye!",
-            voice="alice"
-        )
-        response.hangup()
-        
-        # # Get ngrok URL from environment or use configured base URL
-        # base_url = getattr(settings, "NGROK_URL", "https://a0f5cd136d89.ngrok-free.app")
-        # websocket_url = f"wss://{base_url.replace('https://', '').replace('http://', '')}/api/twilio/websocket"
-        # 
-        # # Connect to WebSocket for bidirectional streaming
-        # connect = Connect()
-        # stream = connect.stream(url=websocket_url)
-        # stream.parameter(name="call_sid", value=call_sid)
-        # stream.parameter(name="from_number", value=from_number)
-        # response.append(connect)
+        # Create TwiML that greets and connects stream
+        response_xml = twilio_service.create_greeting_response(webhook_url=websocket_url)
         
         return Response(
-            content=str(response),
+            content=str(response_xml),
             media_type="application/xml"
         )
         

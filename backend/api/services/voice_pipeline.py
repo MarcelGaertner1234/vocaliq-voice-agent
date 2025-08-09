@@ -44,6 +44,8 @@ class VoicePipelineService:
         self.openai_client = None
         self.elevenlabs_api_key = settings.ELEVENLABS_API_KEY
         self.elevenlabs_voice_id = getattr(settings, "ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")
+        self.whisper_model = settings.WHISPER_MODEL
+        self.whisper_language = settings.WHISPER_LANGUAGE
         
         # Initialize OpenAI client if API key is available
         openai_api_key = settings.OPENAI_API_KEY
@@ -188,9 +190,9 @@ class VoicePipelineService:
             
             # Transcribe with Whisper
             response = await self.openai_client.audio.transcriptions.create(
-                model="whisper-1",
+                model=self.whisper_model,
                 file=wav_buffer,
-                language="en"
+                language=self.whisper_language
             )
             
             return response.text

@@ -15,11 +15,14 @@ DATABASE_URL = postgresql://vocaliq:nrK6l37eQbSThq1Tg9bHS9rz8gksRQDQ@dpg-d2hk4rm
 REDIS_URL = redis://default:AWpXAAIncDE0NDVjZDc5OGJiZjY0ZTM5YjI4MzMzYTk5MTIxNmJkY3AxMjcyMjM@square-parrot-27223.upstash.io:6379
 ```
 
-### 3. Security (PFLICHT)
+### 3. Security (OPTIONAL - haben jetzt Defaults)
 ```
-JWT_SECRET_KEY = your-secret-key-here-min-32-chars
+SECRET_KEY = your-secret-key-here-min-32-chars
+JWT_SECRET_KEY = your-secret-key-here-min-32-chars  
+ADMIN_PASSWORD = ein-sicheres-admin-passwort
 ENCRYPTION_KEY = ToDHON5kuY7-roFy6KRzNxN0HMlnoEKZRs-PkK_oB30=
 ```
+**Hinweis:** Diese haben jetzt Default-Werte, sollten aber in Production überschrieben werden!
 
 ### 4. API Keys (PFLICHT für Funktionalität)
 ```

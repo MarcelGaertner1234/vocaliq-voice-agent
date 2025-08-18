@@ -49,8 +49,8 @@ services:
     name: vocaliq-frontend
     repo: https://github.com/MarcelGaertner1234/vocaliq-voice-agent
     branch: main
-    buildCommand: cd vocaliq-setup-docs/frontend && npm install && npm run build
-    staticPublishPath: ./vocaliq-setup-docs/frontend/dist
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
     headers:
       - path: /*
         name: X-Frame-Options

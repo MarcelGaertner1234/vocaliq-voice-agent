@@ -1,0 +1,22 @@
+# Frontend-specific Render configuration
+# This ensures Render treats this as a Node.js static site
+
+services:
+  - type: static
+    name: vocaliq-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18.18.0
+      - key: VITE_API_URL
+        value: https://vocaliq-voice-agent.onrender.com
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

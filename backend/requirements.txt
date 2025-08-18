@@ -22,7 +22,7 @@ cryptography==41.0.7
 redis==5.0.1
 
 # API Clients
-httpx==0.25.2
+httpx==0.26.0
 twilio==8.11.0
 openai==1.6.1
 elevenlabs==0.2.27

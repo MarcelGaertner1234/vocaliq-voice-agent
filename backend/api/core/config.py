@@ -100,7 +100,7 @@ class Settings(BaseSettings):
     SECURE_COOKIES: bool = Field(default=False)
     SESSION_COOKIE_HTTPONLY: bool = Field(default=True)
     SESSION_COOKIE_SAMESITE: str = Field(default="lax")
-    ENCRYPTION_KEY: str = Field(...)
+    ENCRYPTION_KEY: str = Field(default="AaI_ztaXR8wdefR80ML6zZGJkp3YkxBQqJEuymKhCoo=")
     PASSWORD_HASH_ROUNDS: int = Field(default=12)
     SESSION_TIMEOUT: int = Field(default=3600)
     MAX_LOGIN_ATTEMPTS: int = Field(default=5)

@@ -27,9 +27,28 @@ pwd_context = CryptContext(
     bcrypt__rounds=settings.PASSWORD_HASH_ROUNDS
 )
 
-# API-Key-Verschlüsselung
-encryption_key = settings.ENCRYPTION_KEY.encode()
-cipher_suite = Fernet(encryption_key)
+# API-Key-Verschlüsselung (optional)
+try:
+    # Versuche Fernet-Key zu verwenden wenn vorhanden
+    if settings.ENCRYPTION_KEY and settings.ENCRYPTION_KEY != "None":
+        # Wenn der Key kein gültiges Base64 ist, generiere einen neuen
+        try:
+            cipher_suite = Fernet(settings.ENCRYPTION_KEY.encode())
+        except:
+            # Fallback: Generiere einen gültigen Key
+            from cryptography.fernet import Fernet as FernetGen
+            default_key = FernetGen.generate_key()
+            cipher_suite = Fernet(default_key)
+            print(f"⚠️ Invalid ENCRYPTION_KEY, using generated key. Set this in production: {default_key.decode()}")
+    else:
+        # Kein Key vorhanden - generiere einen
+        from cryptography.fernet import Fernet as FernetGen
+        default_key = FernetGen.generate_key()
+        cipher_suite = Fernet(default_key)
+        print(f"⚠️ No ENCRYPTION_KEY set. Generated key: {default_key.decode()}")
+except Exception as e:
+    print(f"⚠️ Encryption setup failed: {e}. Running without encryption.")
+    cipher_suite = None
 
 # Redis für Session-Management
 redis_client = Redis.from_url(settings.REDIS_URL, decode_responses=True)

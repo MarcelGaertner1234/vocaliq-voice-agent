@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = Field(default="development")
     DEBUG: bool = Field(default=True)
     LOG_LEVEL: str = Field(default="INFO")
-    SECRET_KEY: str = Field(...)
+    SECRET_KEY: str = Field(default="change-this-secret-key-in-production-min-32-chars")
     TIMEZONE: str = Field(default="Europe/Berlin")
     DEFAULT_LANGUAGE: str = Field(default="de")
     
@@ -51,12 +51,12 @@ class Settings(BaseSettings):
     CACHE_KEY_PREFIX: str = Field(default="vocaliq")
     
     # Authentication
-    JWT_SECRET_KEY: str = Field(...)
+    JWT_SECRET_KEY: str = Field(default="change-this-secret-key-in-production-min-32-chars")
     JWT_ALGORITHM: str = Field(default="HS256")
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30)
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7)
     ADMIN_USERNAME: str = Field(default="admin")
-    ADMIN_PASSWORD: str = Field(...)
+    ADMIN_PASSWORD: str = Field(default="vocaliq2024")
     ADMIN_EMAIL: str = Field(default="admin@vocaliq.de")
     
     # Twilio

@@ -105,4 +105,4 @@ const SimplifiedVoiceChat: React.FC = () => {
   )
 }
 
-export default SimplifiedVoiceChat</
+export default SimplifiedVoiceChat

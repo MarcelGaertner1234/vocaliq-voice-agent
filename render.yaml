@@ -45,13 +45,12 @@ services:
         sync: false
 
   # Static Site - VocalIQ Frontend (Automatisch kostenlos!)
-  - type: web
+  - type: static
     name: vocaliq-frontend
-    runtime: static
     repo: https://github.com/MarcelGaertner1234/vocaliq-voice-agent
     branch: main
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/dist
+    buildCommand: cd vocaliq-setup-docs/frontend && npm install && npm run build
+    staticPublishPath: ./vocaliq-setup-docs/frontend/dist
     headers:
       - path: /*
         name: X-Frame-Options

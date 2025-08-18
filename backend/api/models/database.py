@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON
-from pydantic import EmailStr
+# EmailStr removed - using str for SQLModel compatibility
 import uuid
 
 
@@ -71,7 +71,7 @@ class Organization(TimestampMixin, table=True):
     domain: Optional[str] = Field(default=None, max_length=100, description="Primary domain")
     
     # Contact information
-    email: Optional[EmailStr] = Field(default=None, description="Primary contact email")
+    email: Optional[str] = Field(default=None, description="Primary contact email")
     phone: Optional[str] = Field(default=None, max_length=20, description="Primary phone number")
     website: Optional[str] = Field(default=None, max_length=200, description="Website URL")
     
@@ -93,7 +93,7 @@ class Organization(TimestampMixin, table=True):
     # Subscription & Billing
     subscription_plan: str = Field(default="free", max_length=50)
     subscription_status: str = Field(default="active", max_length=20)
-    billing_email: Optional[EmailStr] = Field(default=None)
+    billing_email: Optional[str] = Field(default=None)
     
     # Status
     is_active: bool = Field(default=True)
@@ -117,7 +117,7 @@ class User(TimestampMixin, table=True):
     organization: Optional[Organization] = Relationship(back_populates="users")
     
     # Authentication
-    email: EmailStr = Field(unique=True, index=True, description="User email (login)")
+    email: str = Field(unique=True, index=True, description="User email (login)")
     username: Optional[str] = Field(default=None, max_length=50, unique=True, index=True)
     password_hash: str = Field(description="Bcrypt password hash")
     

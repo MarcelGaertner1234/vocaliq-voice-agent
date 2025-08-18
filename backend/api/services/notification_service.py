@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import asyncio
 
 from twilio.rest import Client
-import aiosmtplib
+# import aiosmtplib  # lazy import inside send_email_confirmation
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -118,6 +118,9 @@ class NotificationService:
             return False
         
         try:
+            # Local import to avoid hard dependency at import time
+            import aiosmtplib
+            
             # Create message
             message = MIMEMultipart("alternative")
             message["Subject"] = f"Reservation Confirmation - {company.name}"

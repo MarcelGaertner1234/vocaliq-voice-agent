@@ -197,7 +197,7 @@ class ElevenLabsService:
             logger.info("🎤 Fetching available voices from ElevenLabs")
             
             url = f"{self.base_url}/voices"
-            headers = {"xi-api-key": self.api_key}
+            headers = {"xi-api-key": self.api_key, "Accept": "application/json"}
             
             async with httpx.AsyncClient() as client:
                 response = await client.get(url, headers=headers)

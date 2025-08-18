@@ -10,6 +10,9 @@ python-multipart
 email-validator
 cryptography
 
+# Email (Leads)
+aiosmtplib
+
 # Configuration & Settings
 python-dotenv
 pydantic[email]

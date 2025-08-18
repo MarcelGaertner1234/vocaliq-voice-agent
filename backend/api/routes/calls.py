@@ -13,6 +13,10 @@ from api.core.security import get_current_user_token, TokenPayload, require_scop
 from api.models.schemas import CallRequest, CallResponse, CallStatus, APIResponse, ErrorResponse
 from api.services.twilio_service import twilio_service
 from api.middleware.rate_limiting import medium_rate_limit
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Query
+from api.core.database import get_session
+from api.repositories.call_repository import CallRepository
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/calls", tags=["Call Management"])
@@ -34,6 +38,18 @@ class TwiMLResponse(BaseModel):
     twiml: str
 
 
+class CallRecordResponse(BaseModel):
+    id: int
+    phone: str
+    direction: str
+    status: str
+    duration: str
+    timestamp: str
+    transcript: str | None = None
+    customerName: str | None = None
+    intent: str | None = None
+
+
 @router.post("/outbound", response_model=CallResponse)
 async def create_outbound_call(
     call_request: CallRequest,
@@ -47,15 +63,13 @@ async def create_outbound_call(
             f"🚀 Creating outbound call from user {token.user_id} "
             f"to {call_request.to_number}"
         )
-        
         # Create call via Twilio
         call_data = await twilio_service.create_outbound_call(
             to_number=call_request.to_number,
             from_number=call_request.from_number,
-            webhook_url=f"{settings.API_BASE_URL}",
+            webhook_url=f"{settings.API_BASE_URL}/api/calls/twiml/voice_start",
             timeout=30
         )
-        
         # Map to our response format
         call_response = CallResponse(
             id=call_data["call_sid"],
@@ -67,15 +81,94 @@ async def create_outbound_call(
             cost=None,
             created_at=call_data["created_at"]
         )
-        
         return call_response
-        
     except Exception as e:
         logger.error(f"Failed to create outbound call: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create call: {str(e)}"
         )
+
+
+@router.get("/", response_model=list[CallRecordResponse])
+async def list_calls(
+    limit: int = Query(50, ge=1, le=200),
+    session: AsyncSession = Depends(get_session),
+    token: TokenPayload = Depends(require_scopes(["calls", "user"]))
+):
+    """
+    Liste der letzten Anrufe (für Dashboard/History)
+    """
+    repo = CallRepository(session)
+    calls = await repo.get_calls_by_organization(
+        organization_id=token.organization_id or 1,
+        limit=limit
+    )
+    def _fmt_duration(seconds: int | None) -> str:
+        if not seconds:
+            return "0:00"
+        minutes = seconds // 60
+        secs = seconds % 60
+        return f"{minutes}:{secs:02d}"
+    results: list[CallRecordResponse] = []
+    for c in calls:
+        results.append(CallRecordResponse(
+            id=c.id,
+            phone=c.from_number if c.direction.value == "inbound" else c.to_number,
+            direction=c.direction.value,
+            status=(
+                "completed" if c.status.value == "completed" else
+                "failed" if c.status.value == "failed" else
+                "in-progress"
+            ),
+            duration=_fmt_duration(c.duration_seconds),
+            timestamp=(c.created_at.isoformat() if getattr(c, "created_at", None) else (c.start_time.isoformat() if c.start_time else datetime.utcnow().isoformat())),
+            transcript=c.transcription or "",
+            customerName=getattr(c, "caller_name", None),
+            intent=None
+        ))
+    return results
+
+# zusätzliche Route ohne Slash (für /api/calls), aus OpenAPI ausgeblendet
+router.add_api_route(
+    path="",
+    endpoint=list_calls,
+    methods=["GET"],
+    include_in_schema=False
+)
+
+
+@router.get("/{id:int}", response_model=CallRecordResponse)
+async def get_call_by_id(
+    id: int,
+    session: AsyncSession = Depends(get_session),
+    token: TokenPayload = Depends(require_scopes(["calls", "user"]))
+):
+    repo = CallRepository(session)
+    c = await repo.get_by_id(id)
+    if not c:
+        raise HTTPException(status_code=404, detail="Call not found")
+    def _fmt_duration(seconds: int | None) -> str:
+        if not seconds:
+            return "0:00"
+        minutes = seconds // 60
+        secs = seconds % 60
+        return f"{minutes}:{secs:02d}"
+    return CallRecordResponse(
+        id=c.id,
+        phone=c.from_number if c.direction.value == "inbound" else c.to_number,
+        direction=c.direction.value,
+        status=(
+            "completed" if c.status.value == "completed" else
+            "failed" if c.status.value == "failed" else
+            "in-progress"
+        ),
+        duration=_fmt_duration(c.duration_seconds),
+        timestamp=(c.created_at.isoformat() if getattr(c, "created_at", None) else (c.start_time.isoformat() if c.start_time else datetime.utcnow().isoformat())),
+        transcript=c.transcription or "",
+        customerName=getattr(c, "caller_name", None),
+        intent=None
+    )
 
 
 @router.get("/{call_sid}", response_model=CallResponse)
@@ -88,21 +181,19 @@ async def get_call_info(
     """
     try:
         call_info = await twilio_service.get_call_info(call_sid)
-        
-        # Map Twilio data to our format
+        if not call_info:
+            raise HTTPException(status_code=404, detail="Call not found")
         call_response = CallResponse(
-            id=call_info["call_sid"],
+            id=call_info["sid"],
             status=CallStatus(call_info["status"]),
             direction=call_info["direction"],
             from_number=call_info["from"],
             to_number=call_info["to"],
             duration=call_info["duration"],
-            cost=call_info["price"],
+            cost=None,
             created_at=call_info["start_time"]
         )
-        
         return call_response
-        
     except HTTPException:
         raise
     except Exception as e:

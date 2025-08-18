@@ -15,6 +15,7 @@ from api.core.config import get_settings
 from api.routes.auth import router as auth_router
 from api.routes.calls import router as calls_router
 from api.middleware.rate_limiting import rate_limit_middleware
+from api.health import router as health_router
 
 # Settings laden
 settings = get_settings()
@@ -50,6 +51,11 @@ async def lifespan(app: FastAPI):
         # Initialize service health checks in background
         # (Don't block startup if services are temporarily unavailable)
         
+        # Start Scheduled Tasks Service
+        from api.services.scheduled_tasks import start_scheduled_tasks
+        start_scheduled_tasks()
+        logger.info("✅ Scheduled Tasks Service started")
+        
     except Exception as e:
         logger.error(f"❌ Service initialization error: {str(e)}")
         # Continue startup even if some services fail
@@ -58,6 +64,14 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("🛑 Shutting down VocalIQ API")
+    
+    # Stop Scheduled Tasks Service
+    try:
+        from api.services.scheduled_tasks import stop_scheduled_tasks
+        stop_scheduled_tasks()
+        logger.info("✅ Scheduled Tasks Service stopped")
+    except Exception as e:
+        logger.error(f"❌ Scheduled Tasks shutdown error: {str(e)}")
     
     # Close database connections
     try:
@@ -134,6 +148,7 @@ async def add_process_time_header(request: Request, call_next):
 api_router = APIRouter(prefix="/api")
 api_router.include_router(auth_router)
 api_router.include_router(calls_router)
+api_router.include_router(health_router)
 
 # Twilio Voice Router unter /api registrieren
 try:
@@ -163,6 +178,38 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Settings router not available: {e}")
 
+# Lead Management Router unter /api registrieren
+try:
+    from api.routes.lead_management import router as lead_management_router
+    api_router.include_router(lead_management_router)
+    logger.info("✅ Lead Management router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Lead Management router not available: {e}")
+
+# Follow-Up Router unter /api registrieren
+try:
+    from api.routes.follow_ups import router as follow_ups_router
+    api_router.include_router(follow_ups_router)
+    logger.info("✅ Follow-Ups router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Follow-Ups router not available: {e}")
+
+# Admin Lead Router unter /api registrieren
+try:
+    from api.routes.admin_leads import router as admin_leads_router
+    api_router.include_router(admin_leads_router)
+    logger.info("✅ Admin Leads router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Admin Leads router not available: {e}")
+
+# Scheduled Tasks Router unter /api registrieren
+try:
+    from api.routes.scheduled_tasks import router as scheduled_tasks_router
+    api_router.include_router(scheduled_tasks_router)
+    logger.info("✅ Scheduled Tasks router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Scheduled Tasks router not available: {e}")
+
 # Knowledge-Router unter /api registrieren
 try:
     from api.routes.knowledge import router as knowledge_router
@@ -170,6 +217,72 @@ try:
     logger.info("✅ Knowledge router registered")
 except ImportError as e:
     logger.warning(f"⚠️ Knowledge router not available: {e}")
+
+# Phone Numbers Router unter /api registrieren
+try:
+    from api.routes.phone_numbers import router as phone_numbers_router
+    api_router.include_router(phone_numbers_router)
+    logger.info("✅ Phone Numbers router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Phone Numbers router not available: {e}")
+
+# Webhooks Router unter /api registrieren
+try:
+    from api.routes.webhooks import router as webhooks_router
+    api_router.include_router(webhooks_router)
+    logger.info("✅ Webhooks router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Webhooks router not available: {e}")
+
+# Test Call Router unter /api registrieren
+try:
+    from api.routes.test_call import router as test_call_router
+    api_router.include_router(test_call_router)
+    logger.info("✅ Test Call router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Test Call router not available: {e}")
+
+# Companies Router unter /api registrieren
+try:
+    from api.routes.companies import router as companies_router
+    api_router.include_router(companies_router)
+    logger.info("✅ Companies router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Companies router not available: {e}")
+
+# Users Router unter /api registrieren
+try:
+    from api.routes.users import router as users_router
+    api_router.include_router(users_router)
+    logger.info("✅ Users router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Users router not available: {e}")
+
+# Voices Router unter /api registrieren
+try:
+    from api.routes.voices import router as voices_router
+    api_router.include_router(voices_router)
+    logger.info("✅ Voices router registered")
+except ImportError as e:
+
+    logger.warning(f"⚠️ Voices router not available: {e}")
+# Audio Router unter /api registrieren
+
+# Voice Chat Router unter /api registrieren
+try:
+    from api.routes.voice_chat import router as voice_chat_router
+    api_router.include_router(voice_chat_router)
+    logger.info("✅ Voice Chat router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Voice Chat router not available: {e}")
+
+try:
+    from api.routes.audio import router as audio_router
+    api_router.include_router(audio_router)
+    logger.info("✅ Audio router registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Audio router not available: {e}")
+    logger.warning(f"⚠️ Voices router not available: {e}")
 
 # Root-API-Router an App hängen
 app.include_router(api_router)
@@ -280,4 +393,4 @@ async def internal_error_handler(request: Request, exc: Exception):
             "message": "An unexpected error occurred" if settings.is_production else str(exc),
             "status_code": 500
         }
-    ) 
+    )

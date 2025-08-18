@@ -1,0 +1,70 @@
+# Dockerfile.render - Optimiert für Render.com Free Tier (512MB RAM)
+FROM python:3.11-slim
+
+# Memory-Optimierung für Free Tier
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    POETRY_VERSION=1.4.2 \
+    # Wichtig für Memory-Management
+    MALLOC_ARENA_MAX=2 \
+    PYTHONMALLOC=malloc
+
+WORKDIR /app
+
+# System dependencies (minimal für Free Tier)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Python dependencies
+COPY requirements.txt .
+
+# Install mit Memory-Optimierung
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir gunicorn \
+    && rm -rf ~/.cache/pip
+
+# Copy application
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p uploads logs analytics/data
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8000}/api/health || exit 1
+
+# Startup script für Memory-Management
+RUN echo '#!/bin/bash\n\
+echo "🚀 Starting VocalIQ API (Free Tier Mode)..."\n\
+echo "📊 Memory Limit: 512MB"\n\
+echo "⚙️ Optimizing for low memory..."\n\
+\n\
+# Database migrations\n\
+echo "📦 Running database migrations..."\n\
+alembic upgrade head || echo "⚠️ Migration failed, continuing..."\n\
+\n\
+# Start with Gunicorn (optimiert für Free Tier)\n\
+exec gunicorn api.main:app \\\n\
+    --bind 0.0.0.0:${PORT:-8000} \\\n\
+    --workers 1 \\\n\
+    --worker-class uvicorn.workers.UvicornWorker \\\n\
+    --timeout 120 \\\n\
+    --keep-alive 5 \\\n\
+    --max-requests 1000 \\\n\
+    --max-requests-jitter 50 \\\n\
+    --log-level info \\\n\
+    --access-logfile - \\\n\
+    --error-logfile - \\\n\
+    --preload' > /app/start.sh && chmod +x /app/start.sh
+
+# Expose port
+EXPOSE 8000
+
+# Start command
+CMD ["/app/start.sh"]

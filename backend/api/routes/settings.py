@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from datetime import datetime
 
 from api.core.database import get_session
 from api.models.database import SystemConfig
@@ -69,11 +70,14 @@ async def update_settings_api(payload: Dict[str, Any], session: AsyncSession = D
                 description="Frontend settings",
                 is_system=False,
                 value_type="json",
-                category="frontend"
+                category="frontend",
+                created_at=datetime.utcnow(),
+                updated_at=None
             )
             session.add(row)
         else:
             row.value = json.dumps(payload)
+            row.updated_at = datetime.utcnow()
             session.add(row)
         await session.commit()
         return {"success": True}

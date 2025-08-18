@@ -17,7 +17,10 @@ services:
       - WEAVIATE_URL=http://weaviate:8080
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - API_BASE_URL=http://localhost:8001
-      - FRONTEND_URL=http://localhost:5173
+      - FRONTEND_URL=http://localhost:5174
+      - ALLOWED_ORIGINS=http://localhost:5174,http://localhost:5173
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - ECHO_MODE=${ECHO_MODE}
     volumes:
       - ./backend:/app
       - ./backend/alembic:/app/alembic
@@ -33,16 +36,16 @@ services:
   # Frontend Dashboard
   frontend:
     build:
-      context: ./backend/frontend
-      dockerfile: Dockerfile.dev
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: vocaliq-frontend
     environment:
-      - VITE_API_URL=http://api:8000
+      - VITE_API_URL=http://localhost:8001/api
     volumes:
-      - ./backend/frontend:/app
+      - ./frontend:/app
       - /app/node_modules
     ports:
-      - "5173:5173"
+      - "5174:5174"
     depends_on:
       - api
 

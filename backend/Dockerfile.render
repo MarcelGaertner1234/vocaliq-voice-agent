@@ -45,13 +45,24 @@ echo "🚀 Starting VocalIQ API (Free Tier Mode)..."\n\
 echo "📊 Memory Limit: 512MB"\n\
 echo "⚙️ Optimizing for low memory..."\n\
 \n\
+# Set default port if not provided\n\
+if [ -z "$PORT" ]; then\n\
+    export PORT=8000\n\
+fi\n\
+\n\
+echo "🌐 Server will run on port: $PORT"\n\
+\n\
 # Database migrations\n\
 echo "📦 Running database migrations..."\n\
-alembic upgrade head || echo "⚠️ Migration failed, continuing..."\n\
+if [ ! -z "$DATABASE_URL" ]; then\n\
+    alembic upgrade head || echo "⚠️ Migration failed, continuing..."\n\
+else\n\
+    echo "⚠️ No DATABASE_URL found, skipping migrations"\n\
+fi\n\
 \n\
 # Start with Gunicorn (optimiert für Free Tier)\n\
 exec gunicorn api.main:app \\\n\
-    --bind 0.0.0.0:${PORT:-8000} \\\n\
+    --bind 0.0.0.0:$PORT \\\n\
     --workers 1 \\\n\
     --worker-class uvicorn.workers.UvicornWorker \\\n\
     --timeout 120 \\\n\

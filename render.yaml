@@ -44,12 +44,10 @@ services:
       - key: TWILIO_AUTH_TOKEN
         sync: false
 
-  # Static Site - VocalIQ Frontend
-  - type: web
+  # Static Site - VocalIQ Frontend (Static Sites sind IMMER kostenlos!)
+  - type: static
     name: vocaliq-frontend
-    runtime: static
     repo: https://github.com/MarcelGaertner1234/vocaliq-voice-agent
-    plan: free # Kostenlos!
     branch: main
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist

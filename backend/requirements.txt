@@ -54,6 +54,7 @@ psutil==5.9.8
 # Utilities
 python-dotenv==1.0.0
 pydantic[email]==2.5.3
+phonenumbers==8.13.27
 pydantic-core==2.14.6
 pydantic-settings==2.1.0
 pendulum==3.0.0
